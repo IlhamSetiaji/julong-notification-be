@@ -17,9 +17,6 @@ type Notification struct {
 	Message     string     `json:"message" gorm:"type:text;not null"`
 	UserID      uuid.UUID  `json:"user_id" gorm:"type:uuid;not null"`
 	CreatedBy   uuid.UUID  `json:"created_by" gorm:"type:uuid;not null"`
-
-	UserName      string `json:"user_name" gorm:"-"`
-	CreatedByName string `json:"created_by_name" gorm:"-"`
 }
 
 func (n *Notification) BeforeCreate(tx *gorm.DB) (err error) {

@@ -2,20 +2,51 @@ package dto
 
 import (
 	"github.com/IlhamSetiaji/julong-notification-be/internal/entity"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/messaging"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/request"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/response"
+	"github.com/IlhamSetiaji/julong-notification-be/logger"
 )
 
 type INotificationDTO interface {
 	ConvertEntityToResponse(ent *entity.Notification) *response.NotificationResponse
 }
 
-type NotificationDTO struct{}
+type NotificationDTO struct {
+	log         logger.Logger
+	userMessage messaging.IUserMessage
+}
 
-func NewNotificationDTO() INotificationDTO {
-	return &NotificationDTO{}
+func NewNotificationDTO(log logger.Logger, userMessage messaging.IUserMessage) INotificationDTO {
+	return &NotificationDTO{
+		log:         log,
+		userMessage: userMessage,
+	}
 }
 
 func (n *NotificationDTO) ConvertEntityToResponse(ent *entity.Notification) *response.NotificationResponse {
+	var userName string
+	var createdByName string
+	user, err := n.userMessage.SendFindUserByIDMessage(request.SendFindUserByIDMessageRequest{
+		ID: ent.UserID.String(),
+	})
+	if err != nil {
+		n.log.GetLogger().Error("Failed to find user by ID: ", "error", err)
+		userName = "Unknown"
+	} else {
+		userName = user.Name
+	}
+
+	createdBy, err := n.userMessage.SendFindUserByIDMessage(request.SendFindUserByIDMessageRequest{
+		ID: ent.CreatedBy.String(),
+	})
+	if err != nil {
+		n.log.GetLogger().Error("Failed to find user by ID: ", "error", err)
+		createdByName = "Unknown"
+	} else {
+		createdByName = createdBy.Name
+	}
+
 	return &response.NotificationResponse{
 		ID:            ent.ID,
 		Application:   ent.Application,
@@ -25,8 +56,8 @@ func (n *NotificationDTO) ConvertEntityToResponse(ent *entity.Notification) *res
 		Message:       ent.Message,
 		UserID:        ent.UserID,
 		CreatedBy:     ent.CreatedBy,
-		UserName:      ent.UserName,
-		CreatedByName: ent.CreatedByName,
+		UserName:      userName,
+		CreatedByName: createdByName,
 		CreatedAt:     ent.CreatedAt,
 		UpdatedAt:     ent.UpdatedAt,
 	}

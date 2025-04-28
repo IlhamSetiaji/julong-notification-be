@@ -6,9 +6,9 @@ import (
 
 	"github.com/IlhamSetiaji/julong-notification-be/internal/request"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/response"
+	"github.com/IlhamSetiaji/julong-notification-be/logger"
 	"github.com/IlhamSetiaji/julong-notification-be/utils"
 	"github.com/google/uuid"
-	"github.com/sirupsen/logrus"
 )
 
 type IUserMessage interface {
@@ -17,16 +17,16 @@ type IUserMessage interface {
 }
 
 type UserMessage struct {
-	Log *logrus.Logger
+	Log logger.Logger
 }
 
-func NewUserMessage(log *logrus.Logger) IUserMessage {
+func NewUserMessage(log logger.Logger) IUserMessage {
 	return &UserMessage{
 		Log: log,
 	}
 }
 
-func UserMessageFactory(log *logrus.Logger) IUserMessage {
+func UserMessageFactory(log logger.Logger) IUserMessage {
 	return NewUserMessage(log)
 }
 

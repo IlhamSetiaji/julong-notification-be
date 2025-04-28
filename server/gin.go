@@ -10,6 +10,7 @@ import (
 	"github.com/IlhamSetiaji/julong-notification-be/database"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/dto"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/handler"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/messaging"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/rabbitmq"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/repository"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/usecase"
@@ -110,7 +111,8 @@ func (g *ginServer) GetApp() *gin.Engine {
 
 func (g *ginServer) initializeNotificationHandler() {
 	notificationRepository := repository.NewNotificationRepository(g.db, g.log)
-	notificationDTO := dto.NewNotificationDTO()
+	userMessage := messaging.NewUserMessage(g.log)
+	notificationDTO := dto.NewNotificationDTO(g.log, userMessage)
 	notificationUseCase := usecase.NewNotificationUseCase(g.log, notificationDTO, notificationRepository)
 	notificationHandler := handler.NewNotificationHandler(g.log, g.validator, notificationUseCase)
 
