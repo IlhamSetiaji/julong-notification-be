@@ -65,13 +65,21 @@ func (h *NotificationHandler) CreateNotification(ctx *gin.Context) {
 func (h *NotificationHandler) GetNotificationsByKeys(ctx *gin.Context) {
 	application := ctx.Query("application")
 	userID := ctx.Query("user_id")
+	readAt := ctx.Query("read_at")
+
 	keys := make(map[string]interface{})
 	if application != "" {
 		keys["application"] = application
 	}
-
 	if userID != "" {
 		keys["user_id"] = userID
+	}
+	if readAt != "" {
+		if readAt == "YES" {
+			keys["read_at"] = "YES"
+		} else {
+			keys["read_at"] = "NO"
+		}
 	}
 
 	notifications, err := h.notificationUseCase.GetNotificationsByKeys(keys)

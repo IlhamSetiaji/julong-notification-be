@@ -17,7 +17,7 @@ type logger struct {
 func NewLogger() Logger {
 	l := logrus.New()
 	l.SetFormatter(&logrus.JSONFormatter{})
-	l.SetLevel(logrus.DebugLevel)
+	l.SetLevel(6)
 
 	return &logger{log: l}
 }

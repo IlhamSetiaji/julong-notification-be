@@ -42,10 +42,33 @@ func (r *NotificationRepository) CreateNotification(ent *entity.Notification) (*
 
 func (r *NotificationRepository) GetNotificationsByKeys(keys map[string]interface{}) ([]entity.Notification, error) {
 	ent := []entity.Notification{}
-	err := r.db.GetDb().Where(keys).Find(&ent).Error
-	if err != nil {
-		r.log.GetLogger().Error("Failed to get notifications by keys: ", "error", err)
-		return nil, err
+	if keys["read_at"] != nil {
+		readAt := keys["read_at"]
+		delete(keys, "read_at")
+		if readAt == "YES" {
+			query := r.db.GetDb().Where(keys).Where("read_at IS NOT NULL")
+			r.log.GetLogger().Info("Generated SQL query ", "query", query.Debug().Statement.SQL.String())
+			err := query.Find(&ent).Error
+			if err != nil {
+				r.log.GetLogger().Error("Failed to get notifications by keys: ", "error", err)
+				return nil, err
+			}
+		} else if readAt == "NO" {
+			err := r.db.GetDb().Where(keys).Where("read_at IS NULL").Find(&ent).Error
+			if err != nil {
+				r.log.GetLogger().Error("Failed to get notifications by keys: ", "error", err)
+				return nil, err
+			}
+		} else {
+			r.log.GetLogger().Error("Invalid value for read_at key: ", "value", readAt)
+			return nil, errors.New("invalid value for read_at key")
+		}
+	} else {
+		err := r.db.GetDb().Where(keys).Find(&ent).Error
+		if err != nil {
+			r.log.GetLogger().Error("Failed to get notifications by keys: ", "error", err)
+			return nil, err
+		}
 	}
 	return ent, nil
 }

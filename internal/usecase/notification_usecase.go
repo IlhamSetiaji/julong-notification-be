@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"errors"
+	"time"
 
 	"github.com/IlhamSetiaji/julong-notification-be/internal/dto"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/entity"
@@ -158,6 +159,14 @@ func (uc *NotificationUseCase) UpdateNotification(req *request.UpdateNotificatio
 	}
 	if req.Message != "" {
 		notification.Message = req.Message
+	}
+	if req.ReadAt != nil {
+		// parsedTime, err := time.Parse("2006-01-02 15:04:05", *req.ReadAt)
+		parsedTime, err := time.Parse(time.RFC3339, *req.ReadAt)
+		if err != nil {
+			return nil, errors.New("invalid ReadAt format, must be RFC3339")
+		}
+		notification.ReadAt = &parsedTime
 	}
 
 	_, err = uc.notificationRepository.UpdateNotification(notification)

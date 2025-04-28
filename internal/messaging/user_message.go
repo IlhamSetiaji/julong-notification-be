@@ -39,7 +39,7 @@ func (m *UserMessage) SendFindUserByIDMessage(req request.SendFindUserByIDMessag
 		ID:          uuid.New().String(),
 		MessageType: "find_user_by_id",
 		MessageData: payload,
-		ReplyTo:     "julong_manpower",
+		ReplyTo:     "julong_notification",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)
@@ -82,7 +82,7 @@ func (m *UserMessage) SendGetUserMe(req request.SendFindUserByIDMessageRequest) 
 		ID:          uuid.New().String(),
 		MessageType: "get_user_me",
 		MessageData: payload,
-		ReplyTo:     "julong_recruitment",
+		ReplyTo:     "julong_notification",
 	}
 
 	log.Printf("INFO: document message: %v", docMsg)

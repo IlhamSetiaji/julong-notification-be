@@ -92,6 +92,12 @@ func (g *ginServer) Start() {
 	g.app.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("App-Name", g.conf.Server.Name)
 	})
+	g.app.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Welcome to " + g.conf.Server.Name,
+			"status":  "OK",
+		})
+	})
 	g.app.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Service is running",
@@ -118,12 +124,12 @@ func (g *ginServer) initializeNotificationHandler() {
 
 	notificationRoutes := g.app.Group("/api/v1/notifications")
 	notificationRoutes.GET("", notificationHandler.GetNotificationsByKeys)
+	notificationRoutes.GET("/all", notificationHandler.GetAllNotifications)
+	notificationRoutes.GET("/user/:user_id", notificationHandler.GetByUserID)
 	notificationRoutes.GET("/:id", notificationHandler.FindByID)
 	notificationRoutes.POST("", notificationHandler.CreateNotification)
-	notificationRoutes.PUT("/:id", notificationHandler.UpdateNotification)
+	notificationRoutes.PUT("/update", notificationHandler.UpdateNotification)
 	notificationRoutes.DELETE("/:id", notificationHandler.DeleteNotification)
-	notificationRoutes.GET("/user/:user_id", notificationHandler.GetByUserID)
-	notificationRoutes.GET("/all", notificationHandler.GetAllNotifications)
 }
 
 func shouldExcludeFromCSRF(path string) bool {
