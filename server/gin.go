@@ -8,7 +8,11 @@ import (
 
 	"github.com/IlhamSetiaji/julong-notification-be/config"
 	"github.com/IlhamSetiaji/julong-notification-be/database"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/dto"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/handler"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/rabbitmq"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/repository"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/usecase"
 	"github.com/IlhamSetiaji/julong-notification-be/logger"
 	"github.com/IlhamSetiaji/julong-notification-be/validator"
 	"github.com/gin-contrib/cors"
@@ -94,12 +98,30 @@ func (g *ginServer) Start() {
 		})
 	})
 
+	g.initializeNotificationHandler()
+
 	g.log.GetLogger().Info("Server started on port " + strconv.Itoa(g.conf.Server.Port))
 	g.app.Run(":" + strconv.Itoa(g.conf.Server.Port))
 }
 
 func (g *ginServer) GetApp() *gin.Engine {
 	return g.app
+}
+
+func (g *ginServer) initializeNotificationHandler() {
+	notificationRepository := repository.NewNotificationRepository(g.db, g.log)
+	notificationDTO := dto.NewNotificationDTO()
+	notificationUseCase := usecase.NewNotificationUseCase(g.log, notificationDTO, notificationRepository)
+	notificationHandler := handler.NewNotificationHandler(g.log, g.validator, notificationUseCase)
+
+	notificationRoutes := g.app.Group("/api/v1/notifications")
+	notificationRoutes.GET("", notificationHandler.GetNotificationsByKeys)
+	notificationRoutes.GET("/:id", notificationHandler.FindByID)
+	notificationRoutes.POST("", notificationHandler.CreateNotification)
+	notificationRoutes.PUT("/:id", notificationHandler.UpdateNotification)
+	notificationRoutes.DELETE("/:id", notificationHandler.DeleteNotification)
+	notificationRoutes.GET("/user/:user_id", notificationHandler.GetByUserID)
+	notificationRoutes.GET("/all", notificationHandler.GetAllNotifications)
 }
 
 func shouldExcludeFromCSRF(path string) bool {
