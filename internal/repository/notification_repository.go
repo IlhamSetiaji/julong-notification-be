@@ -1,10 +1,13 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/IlhamSetiaji/julong-notification-be/database"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/entity"
 	"github.com/IlhamSetiaji/julong-notification-be/logger"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type INotificationRepository interface {
@@ -61,6 +64,9 @@ func (r *NotificationRepository) FindByKeys(keys map[string]interface{}) (*entit
 	ent := &entity.Notification{}
 	err := r.db.GetDb().Where(keys).First(ent).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil // Not found is not an error
+		}
 		r.log.GetLogger().Error("Failed to find notification by keys: ", "error", err)
 		return nil, err
 	}
