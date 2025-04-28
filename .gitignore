@@ -1,0 +1,6 @@
+config.json
+julong-notification-be.exe
+julong-notification-be
+storage/*
+!storage/covers/
+main.exe
