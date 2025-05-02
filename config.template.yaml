@@ -1,0 +1,29 @@
+server:
+  port: 8010
+  name: julong-notification-be
+  url: https://julong-notification.avolut.com
+  os: windows
+
+  
+db:
+  host: prasi.avolut.com
+  port: 8741
+  user: postgres
+  password: gEJIfovgvDAroHhqRiKhYVvrkn2OqXfF3tw8xJmnvw7JhrZgN24pTD9iWMIUIUL6
+  dbname: julong-sync-notification
+  sslmode: disable
+  timezone: Asia/Jakarta
+
+session:
+  secret: julong-notification-secret
+  expiration: 3600 # in seconds
+  name: julong-notification-session
+
+csrf:
+  secret: julong-notification-csrf-secret
+  expiration: 3600 # in seconds
+  name: julong-notification-csrf-token
+
+rabbitmq:
+  host: amqp://julong:HR9hWL5jxSD09XeLIIccOyt1863WvIsy@prasi.avolut.com:5672/
+  queue: julong_notification

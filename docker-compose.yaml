@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5505:8010"
+    volumes:
+      - storage_data:/app/storage
+volumes:
+  storage_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: "/root/data/julong-notification/storage"
+      o: bind
