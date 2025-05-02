@@ -17,6 +17,7 @@ type INotificationRepository interface {
 	FindByKeys(keys map[string]interface{}) (*entity.Notification, error)
 	UpdateNotification(ent *entity.Notification) (*entity.Notification, error)
 	DeleteNotification(id uuid.UUID) error
+	GetUnreadNotificationCount(userID uuid.UUID, application string) (int64, error)
 }
 
 type NotificationRepository struct {
@@ -113,4 +114,16 @@ func (r *NotificationRepository) DeleteNotification(id uuid.UUID) error {
 		return err
 	}
 	return nil
+}
+
+func (r *NotificationRepository) GetUnreadNotificationCount(userID uuid.UUID, application string) (int64, error) {
+	ent := int64(0)
+	err := r.db.GetDb().Model(&entity.Notification{}).
+		Where("user_id = ? AND application = ? AND read_at IS NULL", userID, application).
+		Count(&ent).Error
+	if err != nil {
+		r.log.GetLogger().Error("Failed to get unread notification count: ", "error", err)
+		return 0, err
+	}
+	return ent, nil
 }

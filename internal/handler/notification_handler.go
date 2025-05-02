@@ -19,6 +19,7 @@ type INotificationHandler interface {
 	GetByUserID(ctx *gin.Context)
 	UpdateNotification(ctx *gin.Context)
 	DeleteNotification(ctx *gin.Context)
+	GetUnreadNotificationCount(ctx *gin.Context)
 }
 
 type NotificationHandler struct {
@@ -166,4 +167,24 @@ func (h *NotificationHandler) DeleteNotification(ctx *gin.Context) {
 	}
 
 	utils.SuccessResponse(ctx, http.StatusOK, "Notification deleted successfully", nil)
+}
+
+func (h *NotificationHandler) GetUnreadNotificationCount(ctx *gin.Context) {
+	userID := ctx.Query("user_id")
+	application := ctx.Query("application")
+
+	if userID == "" || application == "" {
+		h.logger.GetLogger().Error("User ID or application is missing")
+		utils.ErrorResponse(ctx, http.StatusBadRequest, "User ID or application is missing", "User ID or application is missing")
+		return
+	}
+
+	count, err := h.notificationUseCase.GetUnreadNotificationCount(userID, application)
+	if err != nil {
+		h.logger.GetLogger().Error("Failed to get unread notification count: ", "error", err)
+		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to get unread notification count", err.Error())
+		return
+	}
+
+	utils.SuccessResponse(ctx, http.StatusOK, "Unread notification count retrieved successfully", count)
 }

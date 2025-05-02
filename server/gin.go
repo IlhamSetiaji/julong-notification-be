@@ -129,6 +129,7 @@ func (g *ginServer) initializeNotificationHandler() {
 	notificationRoutes.GET("", notificationHandler.GetNotificationsByKeys)
 	notificationRoutes.GET("/all", notificationHandler.GetAllNotifications)
 	notificationRoutes.GET("/user/:user_id", notificationHandler.GetByUserID)
+	notificationRoutes.GET("/unread/count", notificationHandler.GetUnreadNotificationCount)
 	notificationRoutes.GET("/:id", notificationHandler.FindByID)
 	notificationRoutes.POST("", notificationHandler.CreateNotification)
 	notificationRoutes.PUT("/update", notificationHandler.UpdateNotification)

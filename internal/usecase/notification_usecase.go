@@ -22,6 +22,7 @@ type INotificationUseCase interface {
 	GetByUserID(userID string) ([]response.NotificationResponse, error)
 	UpdateNotification(req *request.UpdateNotificationRequest) (*response.NotificationResponse, error)
 	DeleteNotification(id string) error
+	GetUnreadNotificationCount(userID string, application string) (int64, error)
 }
 
 type NotificationUseCase struct {
@@ -207,4 +208,18 @@ func (uc *NotificationUseCase) DeleteNotification(id string) error {
 	}
 
 	return nil
+}
+
+func (uc *NotificationUseCase) GetUnreadNotificationCount(userID string, application string) (int64, error) {
+	parsedUserID, err := uuid.Parse(userID)
+	if err != nil {
+		uc.log.GetLogger().Error("Invalid user ID format: ", err)
+		return 0, errors.New("invalid user ID format")
+	}
+	notification, err := uc.notificationRepository.GetUnreadNotificationCount(parsedUserID, application)
+	if err != nil {
+		uc.log.GetLogger().Error("Failed to get unread notification count: ", err)
+		return 0, err
+	}
+	return notification, nil
 }
