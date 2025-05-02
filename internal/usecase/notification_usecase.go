@@ -9,6 +9,7 @@ import (
 	"github.com/IlhamSetiaji/julong-notification-be/internal/repository"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/request"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/response"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/websocket"
 	"github.com/IlhamSetiaji/julong-notification-be/logger"
 	"github.com/google/uuid"
 )
@@ -27,16 +28,19 @@ type NotificationUseCase struct {
 	log                    logger.Logger
 	notificationDTO        dto.INotificationDTO
 	notificationRepository repository.INotificationRepository
+	hub                    *websocket.Hub
 }
 
 func NewNotificationUseCase(
 	log logger.Logger,
 	notificationDTO dto.INotificationDTO,
-	notificationRepository repository.INotificationRepository) INotificationUseCase {
+	notificationRepository repository.INotificationRepository,
+	hub *websocket.Hub) INotificationUseCase {
 	return &NotificationUseCase{
 		log:                    log,
 		notificationDTO:        notificationDTO,
 		notificationRepository: notificationRepository,
+		hub:                    hub,
 	}
 }
 
@@ -64,11 +68,19 @@ func (uc *NotificationUseCase) CreateNotification(req *request.CreateNotificatio
 			CreatedBy:   createdByUUID,
 		}
 
-		_, err = uc.notificationRepository.CreateNotification(notification)
+		createdNotification, err := uc.notificationRepository.CreateNotification(notification)
 		if err != nil {
 			uc.log.GetLogger().Error("Failed to create notification: ", err)
 			return err
 		}
+
+		wsNotification := websocket.Notification{
+			UserID:  userUUID,
+			Message: req.Message,
+			AppType: req.Application,
+			Data:    createdNotification,
+		}
+		uc.hub.BroadcastNotification(wsNotification)
 	}
 
 	return nil

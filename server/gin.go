@@ -14,6 +14,7 @@ import (
 	"github.com/IlhamSetiaji/julong-notification-be/internal/rabbitmq"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/repository"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/usecase"
+	"github.com/IlhamSetiaji/julong-notification-be/internal/websocket"
 	"github.com/IlhamSetiaji/julong-notification-be/logger"
 	"github.com/IlhamSetiaji/julong-notification-be/validator"
 	"github.com/gin-contrib/cors"
@@ -106,6 +107,7 @@ func (g *ginServer) Start() {
 	})
 
 	g.initializeNotificationHandler()
+	g.initializeWebSocketHandler()
 
 	g.log.GetLogger().Info("Server started on port " + strconv.Itoa(g.conf.Server.Port))
 	g.app.Run(":" + strconv.Itoa(g.conf.Server.Port))
@@ -116,10 +118,11 @@ func (g *ginServer) GetApp() *gin.Engine {
 }
 
 func (g *ginServer) initializeNotificationHandler() {
+	hub := websocket.GetHub()
 	notificationRepository := repository.NewNotificationRepository(g.db, g.log)
 	userMessage := messaging.NewUserMessage(g.log)
 	notificationDTO := dto.NewNotificationDTO(g.log, userMessage)
-	notificationUseCase := usecase.NewNotificationUseCase(g.log, notificationDTO, notificationRepository)
+	notificationUseCase := usecase.NewNotificationUseCase(g.log, notificationDTO, notificationRepository, hub)
 	notificationHandler := handler.NewNotificationHandler(g.log, g.validator, notificationUseCase)
 
 	notificationRoutes := g.app.Group("/api/v1/notifications")
@@ -130,6 +133,18 @@ func (g *ginServer) initializeNotificationHandler() {
 	notificationRoutes.POST("", notificationHandler.CreateNotification)
 	notificationRoutes.PUT("/update", notificationHandler.UpdateNotification)
 	notificationRoutes.DELETE("/:id", notificationHandler.DeleteNotification)
+
+	g.log.GetLogger().Info("Notification routes initialized")
+}
+
+func (g *ginServer) initializeWebSocketHandler() {
+	hub := websocket.GetHub()
+	webSocketHandler := handler.NewWebSocketHandler(g.log, hub)
+
+	webSocketRoutes := g.app.Group("/ws")
+	webSocketRoutes.GET("", webSocketHandler.HandleWebSocket)
+
+	g.log.GetLogger().Info("WebSocket routes initialized")
 }
 
 func shouldExcludeFromCSRF(path string) bool {
