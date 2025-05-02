@@ -5,14 +5,23 @@ server:
   os: windows
 
   
+# db:
+#   host: localhost
+#   port: 5432
+#   user: postgres
+#   password: postgres
+#   dbname: julong-notification
+#   sslmode: disable
+#   timezone: Asia/Jakarta
 db:
-  host: localhost
-  port: 5432
+  host: prasi.avolut.com
+  port: 8741
   user: postgres
-  password: postgres
-  dbname: julong-notification
+  password: gEJIfovgvDAroHhqRiKhYVvrkn2OqXfF3tw8xJmnvw7JhrZgN24pTD9iWMIUIUL6
+  dbname: julong-sync-notification
   sslmode: disable
   timezone: Asia/Jakarta
+
 
 session:
   secret: julong-notification-secret

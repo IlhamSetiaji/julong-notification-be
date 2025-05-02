@@ -1,4 +1,3 @@
-// websocket.go
 package websocket
 
 import (
@@ -6,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"gorm.io/gorm"
 )
 
 var (
@@ -20,23 +21,31 @@ type Client struct {
 	ID      string
 	Conn    *websocket.Conn
 	UserID  uuid.UUID
-	Send    chan Notification
+	Send    chan WsNotification
 	AppType string
 }
 
 type Hub struct {
 	clients    map[*Client]bool
-	broadcast  chan Notification
+	broadcast  chan WsNotification
 	register   chan *Client
 	unregister chan *Client
 	mu         sync.Mutex
 }
 
-type Notification struct {
-	UserID  uuid.UUID   `json:"user_id"`
-	Message string      `json:"message"`
-	AppType string      `json:"app_type"`
-	Data    interface{} `json:"data,omitempty"`
+// WsNotification matches the Notification entity structure
+type WsNotification struct {
+	ID          uuid.UUID      `json:"id"`
+	Application string         `json:"application"`
+	Name        string         `json:"name"`
+	URL         string         `json:"url"`
+	ReadAt      *time.Time     `json:"read_at"`
+	Message     string         `json:"message"`
+	UserID      uuid.UUID      `json:"user_id"`
+	CreatedBy   uuid.UUID      `json:"created_by"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `json:"deleted_at,omitempty"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -50,7 +59,7 @@ var upgrader = websocket.Upgrader{
 func GetHub() *Hub {
 	once.Do(func() {
 		HubInstance = &Hub{
-			broadcast:  make(chan Notification),
+			broadcast:  make(chan WsNotification),
 			register:   make(chan *Client),
 			unregister: make(chan *Client),
 			clients:    make(map[*Client]bool),
@@ -80,7 +89,7 @@ func (h *Hub) Run() {
 			h.mu.Lock()
 			for client := range h.clients {
 				if client.UserID == notification.UserID &&
-					(notification.AppType == "" || client.AppType == notification.AppType) {
+					(notification.Application == "" || client.AppType == notification.Application) {
 					select {
 					case client.Send <- notification:
 					default:
@@ -95,7 +104,7 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) BroadcastNotification(notification Notification) {
+func (h *Hub) BroadcastNotification(notification WsNotification) {
 	h.broadcast <- notification
 }
 
@@ -154,7 +163,7 @@ func ServeWS(hub *Hub, w http.ResponseWriter, r *http.Request, userID uuid.UUID,
 		ID:      uuid.New().String(),
 		Conn:    conn,
 		UserID:  userID,
-		Send:    make(chan Notification, 256),
+		Send:    make(chan WsNotification, 256),
 		AppType: appType,
 	}
 
