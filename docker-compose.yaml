@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5505:8010"
+      - "5510:8010"
     volumes:
       - storage_data:/app/storage
 volumes:
