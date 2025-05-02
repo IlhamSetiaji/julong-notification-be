@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	"gorm.io/gorm"
 )
 
 var (
@@ -35,17 +34,18 @@ type Hub struct {
 
 // WsNotification matches the Notification entity structure
 type WsNotification struct {
-	ID          uuid.UUID      `json:"id"`
-	Application string         `json:"application"`
-	Name        string         `json:"name"`
-	URL         string         `json:"url"`
-	ReadAt      *time.Time     `json:"read_at"`
-	Message     string         `json:"message"`
-	UserID      uuid.UUID      `json:"user_id"`
-	CreatedBy   uuid.UUID      `json:"created_by"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"deleted_at,omitempty"`
+	ID            uuid.UUID  `json:"id"`
+	Application   string     `json:"application"`
+	Name          string     `json:"name"`
+	URL           string     `json:"url"`
+	ReadAt        *time.Time `json:"read_at"`
+	Message       string     `json:"message"`
+	UserID        uuid.UUID  `json:"user_id"`
+	CreatedBy     uuid.UUID  `json:"created_by"`
+	UserName      string     `json:"user_name"`
+	CreatedByName string     `json:"created_by_name"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
 }
 
 var upgrader = websocket.Upgrader{

@@ -75,20 +75,8 @@ func (uc *NotificationUseCase) CreateNotification(req *request.CreateNotificatio
 			return err
 		}
 
-		wsNotification := websocket.WsNotification{
-			ID:          createdNotification.ID,
-			Application: createdNotification.Application,
-			Name:        createdNotification.Name,
-			URL:         createdNotification.URL,
-			ReadAt:      createdNotification.ReadAt,
-			Message:     createdNotification.Message,
-			UserID:      createdNotification.UserID,
-			CreatedBy:   createdNotification.CreatedBy,
-			CreatedAt:   createdNotification.CreatedAt,
-			UpdatedAt:   createdNotification.UpdatedAt,
-			DeletedAt:   createdNotification.DeletedAt,
-		}
-		uc.hub.BroadcastNotification(wsNotification)
+		wsNotification := uc.notificationDTO.ConvertEntityToWebsocketResponse(createdNotification)
+		uc.hub.BroadcastNotification(*wsNotification)
 	}
 
 	return nil
