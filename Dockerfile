@@ -52,7 +52,7 @@ RUN rm -rf /app/config.yaml
 # COPY public /app/public
 
 # Copy the storage directory
-COPY storage /app/storage
+# COPY storage /app/storage
 
 # Make the initialization script executable
 RUN chmod +x /app/init-config.sh
