@@ -75,6 +75,14 @@ func (uc *NotificationUseCase) CreateNotification(req *request.CreateNotificatio
 			return err
 		}
 
+		unreadCount, err := uc.notificationRepository.GetUnreadNotificationCount(userUUID, req.Application)
+		if err != nil {
+			uc.log.GetLogger().Error("Failed to get unread notification count: ", err)
+			return err
+		}
+
+		createdNotification.UnreadCount = unreadCount
+
 		wsNotification := uc.notificationDTO.ConvertEntityToWebsocketResponse(createdNotification)
 		uc.hub.BroadcastNotification(*wsNotification)
 	}

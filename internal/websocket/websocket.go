@@ -43,6 +43,7 @@ type WsNotification struct {
 	UserID        uuid.UUID  `json:"user_id"`
 	CreatedBy     uuid.UUID  `json:"created_by"`
 	UserName      string     `json:"user_name"`
+	UnreadCount   int64      `json:"unread_count"`
 	CreatedByName string     `json:"created_by_name"`
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`

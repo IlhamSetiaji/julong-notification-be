@@ -99,6 +99,7 @@ func (n *NotificationDTO) ConvertEntityToWebsocketResponse(ent *entity.Notificat
 		CreatedBy:     ent.CreatedBy,
 		UserName:      userName,
 		CreatedByName: createdByName,
+		UnreadCount:   ent.UnreadCount,
 		CreatedAt:     ent.CreatedAt,
 		UpdatedAt:     ent.UpdatedAt,
 	}
