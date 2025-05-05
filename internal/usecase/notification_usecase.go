@@ -16,7 +16,7 @@ import (
 
 type INotificationUseCase interface {
 	CreateNotification(req *request.CreateNotificationRequest) error
-	GetNotificationsByKeys(keys map[string]interface{}) ([]response.NotificationResponse, error)
+	GetNotificationsByKeys(keys map[string]interface{}, page, pageSize int, search string, sort map[string]interface{}) ([]response.NotificationResponse, int64, error)
 	GetAllNotifications() ([]response.NotificationResponse, error)
 	FindByID(id string) (*response.NotificationResponse, error)
 	GetByUserID(userID string) ([]response.NotificationResponse, error)
@@ -90,11 +90,11 @@ func (uc *NotificationUseCase) CreateNotification(req *request.CreateNotificatio
 	return nil
 }
 
-func (uc *NotificationUseCase) GetNotificationsByKeys(keys map[string]interface{}) ([]response.NotificationResponse, error) {
-	notifications, err := uc.notificationRepository.GetNotificationsByKeys(keys)
+func (uc *NotificationUseCase) GetNotificationsByKeys(keys map[string]interface{}, page, pageSize int, search string, sort map[string]interface{}) ([]response.NotificationResponse, int64, error) {
+	notifications, total, err := uc.notificationRepository.GetNotificationsByKeysPagination(keys, page, pageSize, search, sort)
 	if err != nil {
 		uc.log.GetLogger().Error("Failed to get notifications by keys: ", err)
-		return nil, err
+		return nil, 0, err
 	}
 
 	var responses []response.NotificationResponse
@@ -103,7 +103,7 @@ func (uc *NotificationUseCase) GetNotificationsByKeys(keys map[string]interface{
 		responses = append(responses, *response)
 	}
 
-	return responses, nil
+	return responses, total, nil
 }
 
 func (uc *NotificationUseCase) GetAllNotifications() ([]response.NotificationResponse, error) {

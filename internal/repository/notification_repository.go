@@ -13,6 +13,7 @@ import (
 type INotificationRepository interface {
 	CreateNotification(ent *entity.Notification) (*entity.Notification, error)
 	GetNotificationsByKeys(keys map[string]interface{}) ([]entity.Notification, error)
+	GetNotificationsByKeysPagination(keys map[string]interface{}, page, pageSize int, search string, sort map[string]interface{}) ([]entity.Notification, int64, error)
 	GetAllNotifications() ([]entity.Notification, error)
 	FindByKeys(keys map[string]interface{}) (*entity.Notification, error)
 	UpdateNotification(ent *entity.Notification) (*entity.Notification, error)
@@ -72,6 +73,36 @@ func (r *NotificationRepository) GetNotificationsByKeys(keys map[string]interfac
 		}
 	}
 	return ent, nil
+}
+
+func (r *NotificationRepository) GetNotificationsByKeysPagination(keys map[string]interface{}, page, pageSize int, search string, sort map[string]interface{}) ([]entity.Notification, int64, error) {
+	ent := []entity.Notification{}
+	count := int64(0)
+	query := r.db.GetDb().Model(&entity.Notification{}).Where(keys)
+
+	if search != "" {
+		query = query.Where("name ILIKE ? OR message ILIKE ?", "%"+search+"%", "%"+search+"%")
+	}
+
+	if len(sort) > 0 {
+		for column, order := range sort {
+			query = query.Order(column + " " + order.(string))
+		}
+	} else {
+		query = query.Order("created_at DESC")
+	}
+
+	if err := query.Count(&count).Error; err != nil {
+		r.log.GetLogger().Error("Failed to count notifications: ", "error", err)
+		return nil, 0, err
+	}
+
+	if err := query.Offset((page - 1) * pageSize).Limit(pageSize).Find(&ent).Error; err != nil {
+		r.log.GetLogger().Error("Failed to get notifications by keys with pagination: ", "error", err)
+		return nil, 0, err
+	}
+
+	return ent, count, nil
 }
 
 func (r *NotificationRepository) GetAllNotifications() ([]entity.Notification, error) {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/IlhamSetiaji/julong-notification-be/internal/request"
 	"github.com/IlhamSetiaji/julong-notification-be/internal/usecase"
@@ -83,14 +84,41 @@ func (h *NotificationHandler) GetNotificationsByKeys(ctx *gin.Context) {
 		}
 	}
 
-	notifications, err := h.notificationUseCase.GetNotificationsByKeys(keys)
+	page, err := strconv.Atoi(ctx.Query("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(ctx.Query("page_size"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+
+	search := ctx.Query("search")
+	if search == "" {
+		search = ""
+	}
+
+	createdAt := ctx.Query("created_at")
+	if createdAt == "" {
+		createdAt = "DESC"
+	}
+
+	sort := map[string]interface{}{
+		"created_at": createdAt,
+	}
+
+	notifications, total, err := h.notificationUseCase.GetNotificationsByKeys(keys, page, pageSize, search, sort)
 	if err != nil {
 		h.logger.GetLogger().Error("Failed to get notifications by keys: ", "error", err)
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to get notifications", err.Error())
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Notifications retrieved successfully", notifications)
+	utils.SuccessResponse(ctx, http.StatusOK, "Notifications retrieved successfully", gin.H{
+		"notifications": notifications,
+		"total":         total,
+	})
 }
 
 func (h *NotificationHandler) GetAllNotifications(ctx *gin.Context) {
