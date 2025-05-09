@@ -21,6 +21,7 @@ type (
 		Name string
 		Url  string
 		Os   string
+		Mode string
 	}
 
 	Db struct {

@@ -3,6 +3,7 @@ server:
   name: julong-notification-be
   url: http://localhost:8010
   os: windows
+  mode: debug
 
   
 # db:

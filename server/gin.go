@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -110,7 +111,19 @@ func (g *ginServer) Start() {
 	g.initializeWebSocketHandler()
 
 	g.log.GetLogger().Info("Server started on port " + strconv.Itoa(g.conf.Server.Port))
-	g.app.Run(":" + strconv.Itoa(g.conf.Server.Port))
+	if g.conf.Server.Mode == "debug" {
+		err := g.app.Run(":" + strconv.Itoa(g.conf.Server.Port))
+		if err != nil {
+			log.Panicf("Failed to start HTTPS server: %v", err)
+		}
+	} else {
+		certFile := "cert/cert.crt"
+		keyFile := "cert/privkey.key"
+		err := g.app.RunTLS(":"+strconv.Itoa(g.conf.Server.Port), certFile, keyFile)
+		if err != nil {
+			log.Panicf("Failed to start HTTPS server: %v", err)
+		}
+	}
 }
 
 func (g *ginServer) GetApp() *gin.Engine {

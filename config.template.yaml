@@ -3,6 +3,7 @@ server:
   name: julong-notification-be
   url: https://julong-notification.avolut.com
   os: windows
+  mode: release
 
   
 db:
