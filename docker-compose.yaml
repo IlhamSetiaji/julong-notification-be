@@ -14,5 +14,5 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: "/root/data/julong-notification/storage"
+      device: "~/avolut/data/julong-notification/storage"
       o: bind
