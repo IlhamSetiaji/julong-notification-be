@@ -42,7 +42,7 @@ func NewGinServer(db database.Database, conf config.Config, log logger.Logger, v
 	app.Use(sessions.Sessions(conf.Session.Name, store))
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "https://julong-mpp.avolut.com", "https://julong-recruitment.avolut.com", "https://julong-onboarding.avolut.com", "http://localhost:5173"}, // Frontend URL
+		AllowOrigins:     []string{"http://localhost:3000", "https://julong-mpp.avolut.com", "https://julong-recruitment.avolut.com", "https://julong-onboarding.avolut.com", "http://localhost:5173", "https://hris.julongindonesia.com:3010", "https://hris.julongindonesia.com:3002", "https://hris.julongindonesia.com:3003"}, // Frontend URL
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
